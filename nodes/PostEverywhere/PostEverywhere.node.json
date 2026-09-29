@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-posteverywhere.postEverywhere",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Marketing"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/posteverywhere/n8n-nodes-posteverywhere?tab=readme-ov-file#credentials"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://developers.posteverywhere.ai"
+			}
+		]
+	}
+}

@@ -1,0 +1,62 @@
+{
+	"name": "n8n-nodes-posteverywhere",
+	"version": "0.1.0",
+	"description": "n8n node for PostEverywhere: schedule and publish social media posts to Instagram, TikTok, YouTube, LinkedIn, Facebook, X, Threads, Pinterest, Bluesky and more.",
+	"license": "MIT",
+	"homepage": "https://posteverywhere.ai",
+	"keywords": [
+		"n8n-community-node-package",
+		"n8n",
+		"posteverywhere",
+		"social media",
+		"scheduler",
+		"instagram",
+		"tiktok",
+		"linkedin",
+		"x",
+		"twitter"
+	],
+	"author": {
+		"name": "PostEverywhere",
+		"email": "support@posteverywhere.ai"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/posteverywhere/n8n-nodes-posteverywhere.git"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"build:watch": "tsc --watch",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lint:fix": "n8n-node lint --fix",
+		"test": "vitest run",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": true,
+		"credentials": [
+			"dist/credentials/PostEverywhereApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/PostEverywhere/PostEverywhere.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "*",
+		"eslint": "9.39.4",
+		"n8n-workflow": "*",
+		"prettier": "3.8.3",
+		"release-it": "20.2.0",
+		"typescript": "5.9.3",
+		"vitest": "^3.2.4"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}
