@@ -2,7 +2,7 @@
 	"node": "n8n-nodes-posteverywhere.postEverywhere",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Marketing"],
+	"categories": ["Marketing & Content"],
 	"resources": {
 		"credentialDocumentation": [
 			{

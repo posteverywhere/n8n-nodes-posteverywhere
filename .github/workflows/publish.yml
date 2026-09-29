@@ -1,0 +1,66 @@
+# Publishes n8n-nodes-posteverywhere to npm when a GitHub Release is published.
+#
+# n8n requires community nodes submitted for verification to be published from
+# GitHub Actions with an npm provenance statement (from 1 May 2026). This
+# workflow publishes with `--provenance`, then runs n8n's own verification
+# scan (`@n8n/scan-community-package`) against the published version.
+#
+# Auth: npm Trusted Publishing (OIDC) is used when it is set up for this repo
+# on npmjs.com. Until then, the NPM_TOKEN repository secret is used. The
+# release tag must match the version in package.json (for example v0.1.0 or
+# 0.1.0 for version 0.1.0).
+
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to sign the npm provenance statement (and for OIDC trusted publishing).
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Check release tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Release tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+      - name: Publish with provenance
+        # RELEASE_MODE lets the n8n-node prepublishOnly guard allow this publish.
+        run: npm publish --provenance --access public
+        env:
+          RELEASE_MODE: 'true'
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: n8n community package scan
+        # The scanner exits 0 even when checks fail, so read its output.
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if npm view "n8n-nodes-posteverywhere@$VERSION" version >/dev/null 2>&1; then break; fi
+            sleep 10
+          done
+          npx --yes @n8n/scan-community-package "n8n-nodes-posteverywhere@$VERSION" | tee scan.log
+          grep -q "has passed all security checks" scan.log
