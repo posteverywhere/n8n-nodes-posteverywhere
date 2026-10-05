@@ -3,6 +3,7 @@ import {
 	sleep,
 	type IDataObject,
 	type IExecuteFunctions,
+	type IHookFunctions,
 	type IHttpRequestOptions,
 	type ILoadOptionsFunctions,
 	type JsonObject,
@@ -17,7 +18,7 @@ const MAX_RETRIES = 2;
 /** Never wait longer than this for a Retry-After header. */
 const MAX_WAIT_SECONDS = 30;
 
-type Context = IExecuteFunctions | ILoadOptionsFunctions;
+type Context = IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions;
 
 interface FullResponse {
 	statusCode: number;

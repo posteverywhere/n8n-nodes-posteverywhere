@@ -11,6 +11,7 @@ The node calls the [PostEverywhere REST API](https://developers.posteverywhere.a
 - [Install](#install)
 - [Credentials](#credentials)
 - [Operations](#operations)
+- [Trigger](#trigger)
 - [Example workflows](#example-workflows)
 - [How the node behaves](#how-the-node-behaves)
 - [Development](#development)
@@ -43,16 +44,16 @@ Connect your social accounts in the PostEverywhere app first. The node lists the
 
 ### Post
 
-| Operation | What it does |
-| --- | --- |
-| **Create** | Creates a post. **Mode** picks what happens: **Publish Now**, **Schedule** (at a set time), **Add to Queue** (next free slot in your posting queue) or **Save as Draft**. |
-| **Get** | Gets one post with the status of each destination. |
-| **Get Many** | Lists posts. Filter by status, platform, account or text. Use **Return All** or set a **Limit**. |
-| **Update** | Changes the content, time, accounts, media or platform content of a post. |
-| **Delete** | Deletes a post. Turn on **Also Delete on X** to remove published copies on X too. |
-| **Get Results** | Gets the publish result per platform, including the live post URL when it is published. |
-| **Retry** | Queues every failed destination of a post again. |
-| **Schedule Draft** | Publishes a draft now, or schedules it for a set time. You can also change its accounts. |
+| Operation          | What it does                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Create**         | Creates a post. **Mode** picks what happens: **Publish Now**, **Schedule** (at a set time), **Add to Queue** (next free slot in your posting queue) or **Save as Draft**. |
+| **Get**            | Gets one post with the status of each destination.                                                                                                                        |
+| **Get Many**       | Lists posts. Filter by status, platform, account or text. Use **Return All** or set a **Limit**.                                                                          |
+| **Update**         | Changes the content, time, accounts, media or platform content of a post.                                                                                                 |
+| **Delete**         | Deletes a post. Turn on **Also Delete on X** to remove published copies on X too.                                                                                         |
+| **Get Results**    | Gets the publish result per platform, including the live post URL when it is published.                                                                                   |
+| **Retry**          | Queues every failed destination of a post again.                                                                                                                          |
+| **Schedule Draft** | Publishes a draft now, or schedules it for a set time. You can also change its accounts.                                                                                  |
 
 Fields for **Create**:
 
@@ -66,31 +67,78 @@ Fields for **Create**:
 
 ### Account
 
-| Operation | What it does |
-| --- | --- |
+| Operation    | What it does                                         |
+| ------------ | ---------------------------------------------------- |
 | **Get Many** | Lists your connected accounts with a health summary. |
-| **Get** | Gets one account. |
+| **Get**      | Gets one account.                                    |
 
 ### Media
 
-| Operation | What it does |
-| --- | --- |
+| Operation           | What it does                                                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Upload From URL** | Imports a public image (JPEG, PNG, GIF, WebP, HEIC, up to 25 MB) or MP4 video (up to 4 GB) into your media library. Returns a `media_id`. |
-| **Get Many** | Lists media library items. Filter by type. |
+| **Get Many**        | Lists media library items. Filter by type.                                                                                                |
 
 Images are ready at once. Videos import in the background: the response has `media_status: "uploading"`. Wait until the video is `ready` before you attach it to a post.
 
 ### AI
 
-| Operation | What it does |
-| --- | --- |
+| Operation            | What it does                                                                                                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Generate Caption** | Writes 1 to 5 captions for a topic. Set the platform, tone (professional, casual, witty, enthusiastic, urgent, inspirational) and length (short, medium, long). Each caption uses 1 AI credit. |
 
 ### Analytics
 
-| Operation | What it does |
-| --- | --- |
+| Operation       | What it does                                                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Get Summary** | Gets post counts by status, a per-platform breakdown and engagement totals for the last 24 hours, 7 days, 30 days, all time, or a custom range. |
+
+## Trigger
+
+The **PostEverywhere Trigger** node starts a workflow when something happens in PostEverywhere.
+
+1. Add the **PostEverywhere Trigger** node and pick your credential.
+2. Choose one or more **Events**.
+3. Activate the workflow. The node creates a webhook in PostEverywhere for this workflow. When you deactivate the workflow, the node deletes the webhook.
+
+Events:
+
+| Event                                                             | When it fires                                                             |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Post Scheduled                                                    | A post is scheduled.                                                      |
+| Post Publishing                                                   | Publishing to one account starts.                                         |
+| Post Published                                                    | A post goes live on one account. A post sent to 3 accounts fires 3 times. |
+| Post Failed                                                       | A post fails on one account after all retries.                            |
+| Post Partially Failed                                             | A post went live on some accounts and failed on others.                   |
+| Post Updated                                                      | A post is changed.                                                        |
+| Post Deleted                                                      | A post is deleted.                                                        |
+| Post Approval Requested, Post Approved, Post Changes Requested    | A step in the approval workflow.                                          |
+| Account Connected, Account Disconnected, Account Reconnect Needed | A social account changes state.                                           |
+| Media Uploaded, Media Deleted                                     | A media library item is ready or removed.                                 |
+
+Each run outputs the event as PostEverywhere sends it:
+
+```json
+{
+	"event": "post.published",
+	"event_id": "0f9a2c1e-8b7d-4e6f-a5c4-3b2a1d0e9f8a",
+	"created_at": "2026-10-05T14:30:05.000Z",
+	"organization_id": "5d1c...",
+	"data": {
+		"post_id": "7c1e8a52-3f4b-4d6e-9a0b-1c2d3e4f5a6b",
+		"destination_id": "d2b4f6a8-1c3e-4a5b-8d7f-9e0a1b2c3d4e",
+		"platform": "instagram",
+		"account_id": 2280,
+		"account_name": "acme.co",
+		"published_at": "2026-10-05T14:30:04.000Z",
+		"platform_post_url": "https://www.instagram.com/p/C8abcdEFGhi/"
+	}
+}
+```
+
+Every call is signed. The node checks the `X-PostEverywhere-Signature` header and rejects calls with a bad signature (HTTP 401).
+
+Your n8n instance must be reachable from the internet. PostEverywhere does not send webhooks to `localhost` or private network addresses. An organization can have up to 25 webhooks.
 
 ## Example workflows
 
@@ -143,8 +191,6 @@ npm run lint    # n8n community node lint rules
 npm test        # unit tests (mocked HTTP, no API key needed)
 npm run dev     # start n8n with this node loaded
 ```
-
-Planned for a later version: a trigger node for PostEverywhere webhooks (post published, post failed and similar events). The API supports webhooks today. You can use them now with the n8n **Webhook** node.
 
 ## Links
 

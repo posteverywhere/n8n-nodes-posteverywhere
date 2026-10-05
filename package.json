@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-posteverywhere",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "n8n node for PostEverywhere: schedule and publish social media posts to Instagram, TikTok, YouTube, LinkedIn, Facebook, X, Threads, Pinterest, Bluesky, Telegram, Discord and WordPress.",
 	"license": "MIT",
 	"homepage": "https://posteverywhere.ai",
@@ -52,7 +52,8 @@
 			"dist/credentials/PostEverywhereApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/PostEverywhere/PostEverywhere.node.js"
+			"dist/nodes/PostEverywhere/PostEverywhere.node.js",
+			"dist/nodes/PostEverywhereTrigger/PostEverywhereTrigger.node.js"
 		]
 	},
 	"devDependencies": {

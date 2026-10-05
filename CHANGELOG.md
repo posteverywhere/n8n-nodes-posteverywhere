@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 (2026-10-05)
+
+- New **PostEverywhere Trigger** node. It starts a workflow on any of the 15 PostEverywhere webhook events (post scheduled, published, failed and more). It creates the webhook when you activate the workflow and deletes it when you deactivate it. It checks the signature of every call.
+
 ## 0.1.0 (2026-09-29)
 
 First release.
