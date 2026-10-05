@@ -58,8 +58,10 @@ jobs:
       - name: n8n community package scan
         # The scanner exits 0 even when checks fail, so read its output.
         run: |
-          for i in 1 2 3 4 5 6; do
-            if npm view "n8n-nodes-posteverywhere@$VERSION" version >/dev/null 2>&1; then break; fi
+          # npm can take a few minutes to make a new version and its
+          # provenance visible. Wait for the attestation, up to 5 minutes.
+          for i in $(seq 1 30); do
+            if [ -n "$(npm view "n8n-nodes-posteverywhere@$VERSION" dist.attestations.url 2>/dev/null)" ]; then break; fi
             sleep 10
           done
           npx --yes @n8n/scan-community-package "n8n-nodes-posteverywhere@$VERSION" | tee scan.log
